@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "A fast, lightweight, keyboard-driven terminal music player in Rust"
-homepage = "https://github.com/ohmygodashish/termitune"
 repository = "https://github.com/ohmygodashish/termitune"
 keywords = ["terminal", "tui", "music", "audio", "player"]
 categories = ["multimedia::audio", "command-line-utilities"]
