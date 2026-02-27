@@ -1,16 +1,15 @@
 [package]
 name = "termitune"
 version = "0.1.0"
-edition = "2026"
+edition = "2021"
 
 [dependencies]
 ratatui = "0.28"
 crossterm = "0.28"
 rodio = "0.19"
-loft = "0.10"
+lofty = "0.21"
 dirs = "5"
 walkdir = "2"
-tokio = { version = "1", features = ["full"] }
 log = "0.4"
 env_logger = "0.11"
 
