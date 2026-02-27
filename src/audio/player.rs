@@ -78,8 +78,14 @@ impl AudioPlayer {
         self.is_paused.store(false, Ordering::SeqCst);
     }
 
-    pub fn stop(&self) {
+    pub fn stop(&mut self) {
+        // self.sink.stop();
         self.sink.stop();
+        self.playback_start = None;
+        self.pause_start_time = None;
+        self.total_paused_duration = Duration::ZERO;
+        self.current_duration = None;
+        self.current_track = None;
     }
 
     pub fn is_playing(&self) -> bool {
@@ -104,6 +110,12 @@ impl AudioPlayer {
     }
 
     pub fn elapsed_time(&self) -> Option<Duration> {
+        // 1. HARDWARE CHECK: If the buffer is empty, playback is done.
+        if self.sink.empty() {
+            return self.current_duration; // Locks the timer at 100%
+        }
+
+        // 2. TIME MATH
         if let Some(start) = self.playback_start {
             let mut elapsed = start.elapsed();
             elapsed = elapsed.saturating_sub(self.total_paused_duration);
@@ -112,12 +124,16 @@ impl AudioPlayer {
                 elapsed = elapsed.saturating_sub(pause_start.elapsed());
             }
 
-            Some(elapsed)
+            // 3. CLAMPING: Never let the timer exceed the known duration
+            if let Some(duration) = self.current_duration {
+                Some(elapsed.min(duration))
+            } else {
+                Some(elapsed)
+            }
         } else {
             None
         }
     }
-
     pub fn duration(&self) -> Option<Duration> {
         self.current_duration
     }

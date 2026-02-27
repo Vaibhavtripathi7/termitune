@@ -46,6 +46,18 @@ impl App {
         Ok(app)
     }
 
+    pub fn tick(&mut self){
+        if self.player.current_track().is_some() && self.player.empty(){
+            self.player.stop();
+
+            if let Some(track) = self.queue.next(){
+                let _ = self.player.play(&track.path, Some(track.duration));
+            }
+        }
+    }
+
+
+
     pub fn load_directory(&mut self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         self.entries.clear();
         self.selected_index = 0;

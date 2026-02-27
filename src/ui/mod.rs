@@ -67,6 +67,8 @@ fn run_app<B: ratatui::backend::Backend>(
             render_player(app, f, player_area);
         })?;
 
+        app.tick();
+
         if event::poll(Duration::from_millis(100))? {
             if let Event::Key(key) = event::read()? {
                 if key.kind == KeyEventKind::Press {
