@@ -6,7 +6,7 @@ license = "MIT"
 description = "A fast, lightweight, keyboard-driven terminal music player in Rust"
 homepage = "https://github.com/ohmygodashish/termitune"
 repository = "https://github.com/ohmygodashish/termitune"
-keywords = ["terminal", "tui", "music", "audio", "player", "cli"]
+keywords = ["terminal", "tui", "music", "audio", "player"]
 categories = ["multimedia::audio", "command-line-utilities"]
 
 [dependencies]
