@@ -45,7 +45,7 @@ pub fn render_player(app: &App, frame: &mut Frame, area: Rect) {
 
     let progress_percent = if let (Some(elapsed), Some(total)) = (elapsed, duration) {
         if total.as_secs() > 0 {
-            ((elapsed.as_secs() as f64 / total.as_secs() as f64) * 100.0) as u16
+            ((elapsed.as_secs() as f64 / total.as_secs() as f64) * 100.0).min(100.0) as u16
         } else {
             0
         }
