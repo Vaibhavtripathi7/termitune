@@ -13,13 +13,18 @@ A fast, lightweight, keyboard-driven terminal music player in Rust for unix syst
 
 ## Installation
 
+```bash
+cargo install termitune
+```
+**NOTE:** If cargo is missing, then refer: [Building From Source](#building-from-source)
+
+## Building From Source
+
 ### 1. Install Rust
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
-
-Then restart your terminal.
 
 ### 2. Install System Dependencies
 
