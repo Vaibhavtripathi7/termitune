@@ -123,7 +123,18 @@ impl App {
         }
     }
 
+    #[allow(dead_code)]
     pub fn enter_directory(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        let entry = self.entries.get(self.selected_index).cloned();
+        if let Some(entry) = entry {
+            if let DirEntry::Directory(path) = entry {
+                self.load_directory(&path)?;
+            }
+        }
+        Ok(())
+    }
+
+    pub fn handle_enter_key(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let entry = self.entries.get(self.selected_index).cloned();
         if let Some(entry) = entry {
             match entry {
@@ -132,17 +143,32 @@ impl App {
                 }
                 DirEntry::File(path, _) => {
                     if let Some(metadata) = TrackMetadata::from_path(&path) {
+                        self.player.stop();
+                        self.queue.clear();
                         self.queue.add(metadata);
-                        if !self.player.is_playing() {
-                            if let Some(track) = self.queue.current() {
-                                let _ = self.player.play(&track.path, Some(track.duration));
-                            }
+                        if let Some(track) = self.queue.current() {
+                            let _ = self.player.play(&track.path, Some(track.duration));
                         }
                     }
                 }
             }
         }
         Ok(())
+    }
+
+    #[allow(dead_code)]
+    pub fn play_selected_track(&mut self) {
+        let entry = self.entries.get(self.selected_index).cloned();
+        if let Some(entry) = entry {
+            if let DirEntry::File(path, _) = entry {
+                if let Some(metadata) = TrackMetadata::from_path(&path) {
+                    self.queue.add(metadata);
+                    if let Some(track) = self.queue.current() {
+                        let _ = self.player.play(&track.path, Some(track.duration));
+                    }
+                }
+            }
+        }
     }
 
     pub fn go_back(&mut self) -> Result<(), Box<dyn std::error::Error>> {
