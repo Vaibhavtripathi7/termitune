@@ -14,6 +14,7 @@ pub struct AudioPlayer {
     current_track: Option<PathBuf>,
     current_duration: Option<Duration>,
     playback_start: Option<Instant>,
+    pause_start_time: Option<Instant>,
     total_paused_duration: Duration,
     is_paused: Arc<AtomicBool>,
 }
@@ -31,6 +32,7 @@ impl AudioPlayer {
             current_track: None,
             current_duration: None,
             playback_start: None,
+            pause_start_time: None,
             total_paused_duration: Duration::ZERO,
             is_paused: Arc::new(AtomicBool::new(false)),
         })
@@ -52,17 +54,26 @@ impl AudioPlayer {
         self.current_track = Some(path.clone());
         self.current_duration = duration;
         self.playback_start = Some(Instant::now());
+        self.pause_start_time = None;
         self.total_paused_duration = Duration::ZERO;
 
         Ok(())
     }
 
-    pub fn pause(&self) {
+    pub fn pause(&mut self) {
+        if !self.sink.is_paused() {
+            self.pause_start_time = Some(Instant::now());
+        }
         self.sink.pause();
         self.is_paused.store(true, Ordering::SeqCst);
     }
 
-    pub fn resume(&self) {
+    pub fn resume(&mut self) {
+        if let Some(pause_start) = self.pause_start_time {
+            let paused_duration = pause_start.elapsed();
+            self.total_paused_duration += paused_duration;
+            self.pause_start_time = None;
+        }
         self.sink.play();
         self.is_paused.store(false, Ordering::SeqCst);
     }
@@ -94,12 +105,14 @@ impl AudioPlayer {
 
     pub fn elapsed_time(&self) -> Option<Duration> {
         if let Some(start) = self.playback_start {
-            let elapsed = start.elapsed();
-            if self.is_paused() {
-                Some(elapsed.saturating_sub(self.total_paused_duration))
-            } else {
-                Some(elapsed.saturating_sub(self.total_paused_duration))
+            let mut elapsed = start.elapsed();
+            elapsed = elapsed.saturating_sub(self.total_paused_duration);
+
+            if let Some(pause_start) = self.pause_start_time {
+                elapsed = elapsed.saturating_sub(pause_start.elapsed());
             }
+
+            Some(elapsed)
         } else {
             None
         }
