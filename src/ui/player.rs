@@ -77,6 +77,18 @@ pub fn render_player(app: &App, frame: &mut Frame, area: Rect) {
     let volume_text = Paragraph::new(format!("Vol: {}%", volume_percent))
         .alignment(ratatui::layout::Alignment::Left);
     frame.render_widget(volume_text, volume_area);
+
+    let quit_padding = 2;
+    let quit_hint_width = 19; // "Press 'q' to quit" is 18 chars
+    let quit_hint_area = Rect::new(
+        area.x + area.width.saturating_sub(quit_hint_width + quit_padding),
+        area.y + 7,
+        quit_hint_width,
+        1,
+    );
+    let quit_hint =
+        Paragraph::new("Press 'q' to quit").alignment(ratatui::layout::Alignment::Right);
+    frame.render_widget(quit_hint, quit_hint_area);
 }
 
 fn format_time(duration: Duration) -> String {
