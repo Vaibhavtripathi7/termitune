@@ -5,13 +5,16 @@ use std::io::BufReader;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 pub struct AudioPlayer {
     _stream: OutputStream,
     _stream_handle: OutputStreamHandle,
     sink: Sink,
     current_track: Option<PathBuf>,
+    current_duration: Option<Duration>,
+    playback_start: Option<Instant>,
+    total_paused_duration: Duration,
     is_paused: Arc<AtomicBool>,
 }
 
@@ -26,11 +29,18 @@ impl AudioPlayer {
             _stream_handle: stream_handle,
             sink,
             current_track: None,
+            current_duration: None,
+            playback_start: None,
+            total_paused_duration: Duration::ZERO,
             is_paused: Arc::new(AtomicBool::new(false)),
         })
     }
 
-    pub fn play(&mut self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn play(
+        &mut self,
+        path: &PathBuf,
+        duration: Option<Duration>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         info!("Playing: {:?}", path);
 
         self.stop();
@@ -40,6 +50,9 @@ impl AudioPlayer {
 
         self.sink.append(source);
         self.current_track = Some(path.clone());
+        self.current_duration = duration;
+        self.playback_start = Some(Instant::now());
+        self.total_paused_duration = Duration::ZERO;
 
         Ok(())
     }
@@ -77,6 +90,23 @@ impl AudioPlayer {
 
     pub fn volume(&self) -> f32 {
         self.sink.volume()
+    }
+
+    pub fn elapsed_time(&self) -> Option<Duration> {
+        if let Some(start) = self.playback_start {
+            let elapsed = start.elapsed();
+            if self.is_paused() {
+                Some(elapsed.saturating_sub(self.total_paused_duration))
+            } else {
+                Some(elapsed.saturating_sub(self.total_paused_duration))
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn duration(&self) -> Option<Duration> {
+        self.current_duration
     }
 
     #[allow(dead_code)]
