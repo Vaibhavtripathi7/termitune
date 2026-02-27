@@ -80,11 +80,11 @@ fn run_app<B: ratatui::backend::Backend>(
                             let _ = app.go_back();
                         }
                         KeyAction::Right => {
-                            let _ = app.enter_directory();
+                            let _ = app.handle_enter_key();
                         }
                         KeyAction::Space => app.add_to_queue(),
                         KeyAction::Enter => {
-                            let _ = app.enter_directory();
+                            let _ = app.handle_enter_key();
                         }
                         KeyAction::Backspace => {
                             let _ = app.go_back();
